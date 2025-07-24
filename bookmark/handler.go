@@ -66,7 +66,7 @@ func (bms *BookmarkHandler) updateBookmark(w http.ResponseWriter, r *http.Reques
 	idx := slices.IndexFunc(bms.bookmarks, func(bm Bookmark) bool { return bm.ID == id })
 
 	if idx == -1 {
-		http.Error(w, fmt.Sprintf("no such bookmark id %q", id), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("no such bookmark id %d", id), http.StatusBadRequest)
 		return
 	}
 

@@ -20,6 +20,8 @@ func main() {
 }
 
 func InitialBookmarkHandler() *BookmarkHandler {
+	fixedTime := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	return &BookmarkHandler{
 		bookmarks: []Bookmark{
 			{
@@ -29,7 +31,7 @@ func InitialBookmarkHandler() *BookmarkHandler {
 					Description: "Feminist book from mona cholet about the culpabilisation of the minorities",
 					URL:         "myRoom.irl",
 				},
-				CreatedAt: time.Now(),
+				CreatedAt: fixedTime,
 			},
 			{
 				ID: 2,
@@ -38,7 +40,7 @@ func InitialBookmarkHandler() *BookmarkHandler {
 					Description: "RIP Kentaro Miura",
 					URL:         "myRoom.irl",
 				},
-				CreatedAt: time.Now(),
+				CreatedAt: fixedTime,
 			},
 			{
 				ID: 3,
@@ -47,7 +49,7 @@ func InitialBookmarkHandler() *BookmarkHandler {
 					Description: "A milestone of feminism literature by Valerie Solanas",
 					URL:         "myRoom.irl",
 				},
-				CreatedAt: time.Now(),
+				CreatedAt: fixedTime,
 			},
 			{
 				ID: 4,
@@ -56,7 +58,7 @@ func InitialBookmarkHandler() *BookmarkHandler {
 					Description: "Political book about 2017 french presidential election by Francois Begaudeau",
 					URL:         "myRoom.irl",
 				},
-				CreatedAt: time.Now(),
+				CreatedAt: fixedTime,
 			},
 		},
 	}
