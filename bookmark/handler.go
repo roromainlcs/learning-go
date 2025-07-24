@@ -9,12 +9,16 @@ import (
 	"time"
 )
 
+type BookmarkBase struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+}
+
 type Bookmark struct {
-	ID          int       `json:"id"`
-	Title       string    `json:"title"`
-	URL         string    `json:"url"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID int `json:"id"`
+	BookmarkBase
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type BookmarkHandler struct {
@@ -22,31 +26,36 @@ type BookmarkHandler struct {
 }
 
 func (bms *BookmarkHandler) createBookmark(w http.ResponseWriter, r *http.Request) {
-	var newBookmark Bookmark
-	err := json.NewDecoder(r.Body).Decode(&newBookmark)
+	var receivedBookmark BookmarkBase
+	err := json.NewDecoder(r.Body).Decode(&receivedBookmark)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	newBookmarkID := bms.bookmarks[len(bms.bookmarks)-1].ID + 1
+	newBookmark := Bookmark{BookmarkBase: receivedBookmark, ID: newBookmarkID, CreatedAt: time.Now()}
 	bms.bookmarks = append(bms.bookmarks, newBookmark)
+	Send(w, "bookmark created succesfully")
 }
 
-func (bms BookmarkHandler) getBookmark(w http.ResponseWriter, r *http.Request) {
+func (bms *BookmarkHandler) getBookmark(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	idx := slices.IndexFunc(bms.bookmarks, func(bm Bookmark) bool { return bm.ID == id })
 	if idx == -1 {
 		http.Error(w, fmt.Sprintf("no such bookmark id %d", id), http.StatusBadRequest)
+		return
 	}
-	json.Marshal(bms.bookmarks[idx])
+	Send(w, bms.bookmarks[idx])
 }
 
 func (bms *BookmarkHandler) updateBookmark(w http.ResponseWriter, r *http.Request) {
-	var updatedBookmark Bookmark
+	var updatedBookmark BookmarkBase
 	err := json.NewDecoder(r.Body).Decode(&updatedBookmark)
 	id, errID := strconv.Atoi(r.PathValue("id"))
 
@@ -58,27 +67,22 @@ func (bms *BookmarkHandler) updateBookmark(w http.ResponseWriter, r *http.Reques
 
 	if idx == -1 {
 		http.Error(w, fmt.Sprintf("no such bookmark id %q", id), http.StatusBadRequest)
+		return
 	}
 
-	bms.bookmarks[idx] = updatedBookmark
+	bms.bookmarks[idx].Title = updatedBookmark.Title
+	bms.bookmarks[idx].Description = updatedBookmark.Title
+	bms.bookmarks[idx].Title = updatedBookmark.Description
+	bms.bookmarks[idx].CreatedAt = time.Now()
+	Send(w, fmt.Sprintf("Bookmark of ID %d updated successfuly", id))
 }
 
-func (bms BookmarkHandler) getBookmarks(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("coucou\n")
-	var response []byte
-	var err error
-
+func (bms *BookmarkHandler) getBookmarks(w http.ResponseWriter, r *http.Request) {
 	if len(bms.bookmarks) == 0 {
 		fmt.Printf("no bookmarks\n")
-		response, err = json.Marshal("no bookmarks saved yet :(")
-	} else {
-		response, err = json.Marshal(bms.bookmarks)
+		Send(w, "no bookmarks saved yet :(")
 	}
-	if err != nil {
-		http.Error(w, "error loading json", http.StatusInternalServerError)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
+	Send(w, bms.bookmarks, "bookmarks")
 }
 
 func (bms *BookmarkHandler) deleteBookmark(w http.ResponseWriter, r *http.Request) {
