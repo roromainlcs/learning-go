@@ -14,7 +14,8 @@ func Send(w http.ResponseWriter, response any, name ...string) {
 	sent, err := json.Marshal(map[string]any{key: response})
 
 	if err != nil {
-		http.Error(w, "error loading json", http.StatusInternalServerError)
+		http.Error(w, `{"message":"error loading json"}`, http.StatusInternalServerError)
+	} else {
+		w.Write(sent)
 	}
-	w.Write(sent)
 }
